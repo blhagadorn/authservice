@@ -66,7 +66,9 @@ ContainsHeaders(std::vector<std::pair<std::string, ::testing::Matcher<std::strin
 }
 
 class OidcFilterTest : public ::testing::Test {
-protected:
+
+ protected:
+
   config::oidc::OIDCConfig config_;
   std::string callback_host_;
   std::string callback_path_;
@@ -78,7 +80,8 @@ protected:
   ::envoy::service::auth::v2::CheckResponse response_;
 
   // id_token exp of Feb 2, 2062
-  const char *test_id_token_jwt_string_ = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTA2MTI5MDIyLCJleHAiOjI5MDYxMzkwMjJ9.jV2_EH7JB30wgg248x2AlCkZnIUH417I_7FPw3nr5BQ";
+  const char *test_id_token_jwt_string_ =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTA2MTI5MDIyLCJleHAiOjI5MDYxMzkwMjJ9.jV2_EH7JB30wgg248x2AlCkZnIUH417I_7FPw3nr5BQ";
   const std::string requested_url_ = "https://example.com/summary?foo=bar";
   google::jwt_verify::Jwt test_id_token_jwt_;
   const std::string expected_session_cookie_name = "__Host-cookie-prefix-authservice-session-id-cookie";
@@ -133,6 +136,7 @@ protected:
                                                         absl::string_view expected_nonce);
 
   void MockSessionGenerator(absl::string_view session_id, absl::string_view state, absl::string_view nonce);
+
 };
 
 TEST_F(OidcFilterTest, Constructor) {
@@ -193,17 +197,17 @@ TEST_F(OidcFilterTest, NoAuthorization) {
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StrEq("https://acme-idp.tld/"
-                                               "authorization?client_id=example-app&nonce=" + nonce +
-                                               "&redirect_uri=https%3A%2F%2Fme.tld%2Fcallback&response_type=code&"
-                                               "scope=openid&state=" + state)
+                          {Location, StrEq("https://acme-idp.tld/"
+                                           "authorization?client_id=example-app&nonce=" + nonce +
+                              "&redirect_uri=https%3A%2F%2Fme.tld%2Fcallback&response_type=code&"
+                              "scope=openid&state=" + state)
                           },
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + session_id +
-                                               "; "
-                                               "HttpOnly; Path=/; "
-                                               "SameSite=Lax; Secure")
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + session_id +
+                              "; "
+                              "HttpOnly; Path=/; "
+                              "SameSite=Lax; Secure")
                           }
                       })
   );
@@ -272,11 +276,11 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")
                           }
                       })
   );
@@ -300,7 +304,6 @@ TEST_F(OidcFilterTest,
   token_response.SetAccessToken("fake_access_token");
   session_store_->SetTokenResponse(old_session_id, std::make_shared<TokenResponse>(token_response));
 
-
   OidcFilter filter(common::http::ptr_t(), config_, parser_mock_, session_string_generator_mock_, session_store_);
   auto httpRequest =
       request_.mutable_attributes()->mutable_request()->mutable_http();
@@ -316,11 +319,11 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 }
@@ -361,7 +364,7 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.ok_response().headers(),
       ContainsHeaders({
-                          {Authorization,  StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
+                          {Authorization, StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
                           {"access_token", StrEq("expected_refreshed_access_token")},
                       })
   );
@@ -401,11 +404,11 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 }
@@ -444,11 +447,11 @@ TEST_F(OidcFilterTest, Process_RedirectsUsersToAuthenticate_WhenFailingToParseTh
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 
@@ -461,7 +464,8 @@ TEST_F(OidcFilterTest, Process_RedirectsUsersToAuthenticate_WhenFailingToEstabli
   SetExpiredAccessTokenResponseInSessionStore();
 
   auto mocked_http = new common::http::HttpMock();
-  EXPECT_CALL(*mocked_http, Post(Eq(token_uri), _, _, Eq("some-ca"), Eq("http://some-proxy-uri.com"), _, _)).WillOnce(Return(ByMove(nullptr)));
+  EXPECT_CALL(*mocked_http, Post(Eq(token_uri), _, _, Eq("some-ca"), Eq("http://some-proxy-uri.com"), _, _)).WillOnce(
+      Return(ByMove(nullptr)));
 
   auto old_session_id = std::string("session123");
   auto new_session_id = std::string("session456");
@@ -482,11 +486,11 @@ TEST_F(OidcFilterTest, Process_RedirectsUsersToAuthenticate_WhenFailingToEstabli
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 
@@ -517,7 +521,6 @@ TEST_F(OidcFilterTest, Process_RedirectsUsersToAuthenticate_WhenIDPReturnsUnsucc
   auto jwt_status = test_id_token_jwt_.parseFromString(test_id_token_jwt_string_);
   ASSERT_EQ(jwt_status, google::jwt_verify::Status::Ok);
 
-
   OidcFilter filter(common::http::ptr_t(mocked_http), config_, parser_mock_, session_string_generator_mock_,
                     session_store_);
 
@@ -530,11 +533,11 @@ TEST_F(OidcFilterTest, Process_RedirectsUsersToAuthenticate_WhenIDPReturnsUnsucc
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 
@@ -583,7 +586,7 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.ok_response().headers(),
       ContainsHeaders({
-                          {Authorization,  StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
+                          {Authorization, StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
                           {"access_token", StrEq("fake_access_token")},
                       })
   );
@@ -593,7 +596,8 @@ TEST_F(OidcFilterTest, ExpiredIdTokenShouldRedirectToIdpToAuthenticateAgainWhenT
   EnableAccessTokens(config_);
 
   //ID Token with exp of Sep 22, 2017
-  const char *expired_id_token_jwt_string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTA2MTI5MDIyLCJleHAiOjE1MDYxMzkwMjJ9.nYUg1lKTjuuT5aD2HuoPzOUtWCgenscZXisuCEzho1s";
+  const char *expired_id_token_jwt_string =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTA2MTI5MDIyLCJleHAiOjE1MDYxMzkwMjJ9.nYUg1lKTjuuT5aD2HuoPzOUtWCgenscZXisuCEzho1s";
   google::jwt_verify::Jwt expired_id_token_jwt;
 
   auto jwt_status = expired_id_token_jwt.parseFromString(expired_id_token_jwt_string);
@@ -623,11 +627,11 @@ TEST_F(OidcFilterTest, ExpiredIdTokenShouldRedirectToIdpToAuthenticateAgainWhenT
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(config_.authorization_uri())},
+                          {Location, StartsWith(config_.authorization_uri())},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name + "=" + new_session_id +
-                                               "; HttpOnly; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name + "=" + new_session_id +
+                              "; HttpOnly; Path=/; SameSite=Lax; Secure")}
                       })
   );
 }
@@ -646,7 +650,7 @@ TEST_F(OidcFilterTest,
   ASSERT_THAT(
       response_.ok_response().headers(),
       ContainsHeaders({
-                          {Authorization,  StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
+                          {Authorization, StrEq("Bearer " + std::string(test_id_token_jwt_string_))},
                           {"access_token", StrEq("expected_access_token")},
                       })
   );
@@ -673,11 +677,11 @@ TEST_F(OidcFilterTest, LogoutWithCookies) {
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StrEq("https://redirect-uri")},
+                          {Location, StrEq("https://redirect-uri")},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name +
-                                               "=deleted; HttpOnly; Max-Age=0; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name +
+                              "=deleted; HttpOnly; Max-Age=0; Path=/; SameSite=Lax; Secure")}
                       })
   );
 }
@@ -698,11 +702,11 @@ TEST_F(OidcFilterTest, LogoutWithNoCookies) {
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StrEq("https://redirect-uri")},
+                          {Location, StrEq("https://redirect-uri")},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
-                          {SetCookie,    StrEq(expected_session_cookie_name +
-                                               "=deleted; HttpOnly; Max-Age=0; Path=/; SameSite=Lax; Secure")}
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
+                          {SetCookie, StrEq(expected_session_cookie_name +
+                              "=deleted; HttpOnly; Max-Age=0; Path=/; SameSite=Lax; Secure")}
                       })
   );
 }
@@ -751,7 +755,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenAuthorizationStateInfoCann
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -794,7 +798,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenTokenResponseIsMissingAcce
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -822,7 +826,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenMissingCode) {
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -843,7 +847,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenMissingState) {
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -871,7 +875,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenUnexpectedState) {
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -903,7 +907,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenBrokenPipe) {
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -938,7 +942,7 @@ TEST_F(OidcFilterTest, RetrieveToken_ReturnsError_WhenInvalidResponse) {
       response_.denied_response().headers(),
       ContainsHeaders({
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
@@ -1012,9 +1016,9 @@ void OidcFilterTest::AssertRetrieveToken(config::oidc::OIDCConfig &oidcConfig, s
   ASSERT_THAT(
       response_.denied_response().headers(),
       ContainsHeaders({
-                          {Location,     StartsWith(requested_url)},
+                          {Location, StartsWith(requested_url)},
                           {CacheControl, StrEq(CacheControlDirectives::NoCache)},
-                          {Pragma,       StrEq(PragmaDirectives::NoCache)},
+                          {Pragma, StrEq(PragmaDirectives::NoCache)},
                       })
   );
 }
