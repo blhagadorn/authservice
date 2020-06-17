@@ -72,9 +72,9 @@ AuthServiceImpl::AuthServiceImpl(const config::Config &config)
                   request->attributes().request().http().path());
     return ::grpc::Status::OK;
   } catch (const std::exception &exception) {
-    spdlog::error("%s unexpected error: %s", __func__, exception.what());
+    spdlog::error("{} unexpected error: {}", __func__, exception.what());
   } catch (...) {
-    spdlog::error("%s unexpected error: unknown", __func__);
+    spdlog::error("{} unexpected error: unknown", __func__);
   }
   return ::grpc::Status(::grpc::StatusCode::INTERNAL, "internal error");
 }
