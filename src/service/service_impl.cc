@@ -11,7 +11,7 @@ namespace service {
 AuthServiceImpl::AuthServiceImpl(const config::Config &config)
     : trigger_rules_config_(config.trigger_rules()) {
   for (const auto &chain_config : config.chains()) {
-    std::unique_ptr<filters::FilterChain> chain(new filters::FilterChainImpl(chain_config));
+    std::unique_ptr<filters::FilterChain> chain(new filters::FilterChainImpl(chain_config, config.threads()));
     chains_.push_back(std::move(chain));
   }
 }
